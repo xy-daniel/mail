@@ -3,6 +3,7 @@ package org.javaboy.mail;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -52,4 +53,20 @@ class MailApplicationTests {
         javaMailSender.send(mimeMessage);
     }
 
+    /**
+     * 发送带图片资源的邮件
+     */
+    @Test
+    void picture() throws MessagingException {
+        MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+        MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, true);
+        mimeMessageHelper.setSubject("这是测试带图片邮件主题");
+        mimeMessageHelper.setText("这是测试带图片邮件内容,这是第一张图图片<img src='cid:p01'/>,这是第二张图片<img src='cid:p02'/>", true);
+        mimeMessageHelper.setFrom("1207350458@qq.com");
+        mimeMessageHelper.setSentDate(new Date());
+        mimeMessageHelper.setTo("myarctic@163.com");
+        mimeMessageHelper.addInline("p01", new FileSystemResource(new File("E:\\ws\\20200324144437.jpg")));
+        mimeMessageHelper.addInline("p02", new FileSystemResource(new File("E:\\ws\\20200324144437.jpg")));
+        javaMailSender.send(mimeMessage);
+    }
 }
