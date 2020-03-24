@@ -1,5 +1,8 @@
 package org.javaboy.mail;
 
+import freemarker.template.Configuration;
+import freemarker.template.Template;
+import freemarker.template.TemplateException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -9,12 +12,15 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
-import org.thymeleaf.context.IContext;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import java.io.File;
+import java.io.IOException;
+import java.io.StringWriter;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 @SpringBootTest
 class MailApplicationTests {
@@ -90,6 +96,29 @@ class MailApplicationTests {
         context.setVariable("joblevel", "高级工程师");
         String process = templateEngine.process("mail.html", context);
         mimeMessageHelper.setText(process, true);
+        mimeMessageHelper.setFrom("1207350458@qq.com");
+        mimeMessageHelper.setSentDate(new Date());
+        mimeMessageHelper.setTo("myarctic@163.com");
+        javaMailSender.send(mimeMessage);
+    }
+
+    @Test
+    void freemarker() throws MessagingException, IOException, TemplateException {
+        MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+        MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, true);
+        mimeMessageHelper.setSubject("这是测试freemarker邮件主题");
+        Configuration configuration = new Configuration(Configuration.VERSION_2_3_29);
+        configuration.setClassLoaderForTemplateLoading(this.getClass().getClassLoader(),"templates");
+        Template template = configuration.getTemplate("mail.ftlh");
+        Map<String, Object> map = new HashMap<>();
+        map.put("username", "丁代光");
+        map.put("position", "Java工程师");
+        map.put("dep", "产品研发部");
+        map.put("salary", "24K元/月");
+        map.put("joblevel", "高级工程师");
+        StringWriter out = new StringWriter();
+        template.process(map, out);
+        mimeMessageHelper.setText(out.toString(), true);
         mimeMessageHelper.setFrom("1207350458@qq.com");
         mimeMessageHelper.setSentDate(new Date());
         mimeMessageHelper.setTo("myarctic@163.com");
