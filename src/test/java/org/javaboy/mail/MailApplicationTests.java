@@ -7,6 +7,9 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
+import org.thymeleaf.context.IContext;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
@@ -67,6 +70,29 @@ class MailApplicationTests {
         mimeMessageHelper.setTo("myarctic@163.com");
         mimeMessageHelper.addInline("p01", new FileSystemResource(new File("E:\\ws\\20200324144437.jpg")));
         mimeMessageHelper.addInline("p02", new FileSystemResource(new File("E:\\ws\\20200324144437.jpg")));
+        javaMailSender.send(mimeMessage);
+    }
+
+    //将thymeleaf渲染成一个html页面
+    @Autowired
+    TemplateEngine templateEngine;
+
+    @Test
+    void thymeleaf() throws MessagingException {
+        MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+        MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, true);
+        mimeMessageHelper.setSubject("这是测试thymeleaf邮件主题");
+        Context context = new Context();
+        context.setVariable("username", "丁代光");
+        context.setVariable("position", "Java工程师");
+        context.setVariable("dep", "产品研发部");
+        context.setVariable("salary", "24K元/月");
+        context.setVariable("joblevel", "高级工程师");
+        String process = templateEngine.process("mail.html", context);
+        mimeMessageHelper.setText(process, true);
+        mimeMessageHelper.setFrom("1207350458@qq.com");
+        mimeMessageHelper.setSentDate(new Date());
+        mimeMessageHelper.setTo("myarctic@163.com");
         javaMailSender.send(mimeMessage);
     }
 }
